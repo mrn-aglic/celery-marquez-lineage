@@ -12,6 +12,5 @@ def setup_periodic_tasks(sender, **kwargs):
         if config.is_scheduler():
             return
 
-
     except Exception as e:
         logger.error(f"An exception occurred: {e}")
