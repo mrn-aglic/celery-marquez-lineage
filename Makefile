@@ -6,7 +6,10 @@ run-scheduler:
 	make down && docker compose up redis scheduler
 
 del-redis:
-	rm redis_data/dump.rdb
+	rm redis_data/dump.rdb || true
+
+prune:
+	docker compose down --volumes --rmi="all" && make del-redis
 
 down:
 	rm examples/celerybeat-schedule || true && docker compose down
@@ -15,7 +18,7 @@ build:
 	docker compose build
 
 build-cl:
-	docker compose down --volumes --rmi="all" && make build
+	make clean && make build
 
 run:
 	make down && docker compose up

@@ -11,6 +11,7 @@ def store_job_details(run_id: str, job_name: str, job_namespace: str):
     r.hset(run_id, mapping={"name": job_name, "namespace": job_namespace})
     r.expire(run_id, 86400)  # TTL = 86400 seconds (1 day)
 
+
 def get_job_details(run_id: str):
     r = get_redis_instance()
 
