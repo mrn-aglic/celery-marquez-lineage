@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   redis:
     image: 'redis:alpine'
@@ -22,6 +20,7 @@ services:
     depends_on:
       - redis
       - scheduler
+      - marquez
     env_file:
       - .env
     entrypoint: [ './entrypoint.sh', 'worker', 'default' ]
@@ -58,3 +57,53 @@ services:
 #      - .env
 #    ports:
 #      - '5555:5555'
+
+  marquez:
+    image: marquezproject/marquez:latest
+    container_name: marquez
+    env_file:
+      - .env
+    environment:
+      - PROXY_CHANGE_ORIGIN=true
+    depends_on:
+      - marquez-db
+    links:
+      - marquez-db:postgres
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+#    volumes:
+#      - ./docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
+#    entrypoint: [ "./wait-for-it.sh", "postgres:5432", "--", "./entrypoint.sh" ]
+
+  marquezweb:
+    image: marquezproject/marquez-web:latest
+    container_name: marquezweb
+    env_file:
+      - .env
+    environment:
+      - REACT_APP_ADVANCED_SEARCH=false
+    ports:
+      - "3000:3000"
+    stdin_open: true
+    tty: true
+    depends_on:
+      - marquez
+
+  marquez-db:
+    image: postgres:14
+    container_name: marquez-db
+    environment:
+      - POSTGRES_USER=marquez
+      - POSTGRES_PASSWORD=marquez
+      - MARQUEZ_USER=marquez
+      - MARQUEZ_PASSWORD=marquez
+      - MARQUEZ_DB=marquez
+    volumes:
+      - marquez-db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+
+volumes:
+  marquez-db-data:
