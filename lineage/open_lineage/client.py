@@ -1,12 +1,14 @@
+import typing
+
 from openlineage.client import OpenLineageClient
 from openlineage.client.event_v2 import RunState
-from openlineage.client.generated.base import RunFacet
+from openlineage.client.generated.base import InputDataset, OutputDataset, RunFacet
 from openlineage.client.transport import HttpTransport
 from openlineage.client.transport.http import HttpCompression, HttpConfig
 
 from lineage.app import config
 from lineage.open_lineage.consts import DEFAULT_NAMESPACE
-from lineage.open_lineage.core import events, facets
+from lineage.open_lineage.core import datasets, events, facets
 from lineage.open_lineage.details_source import marquez_source, redis_source
 
 http_config = HttpConfig(
@@ -32,13 +34,21 @@ class LineageClient:
         name: str,
         run_facets: dict[str, RunFacet] | None = None,
         namespace=DEFAULT_NAMESPACE,
+        inputs: typing.Optional[list[InputDataset]] = None,
+        outputs: typing.Optional[list[OutputDataset]] = None,
     ):
+
+        inputs = inputs or []
+        outputs = outputs or []
+
         run_event = events.create_event(
             event_type=event_type,
             run_id=run_id,
             run_facets=run_facets,
             name=name,
             namespace=namespace,
+            inputs=inputs,
+            outputs=outputs,
         )
 
         self.lineage_client.emit(run_event)
@@ -63,6 +73,12 @@ class LineageClient:
             parent_namespace=parent_namespace,
             parent_job_name=parent_job_name,
         )
+
+    def create_input_dataset(self, name: str, namespace: str):
+        return datasets.create_input_dataset(name, namespace)
+
+    def create_output_dataset(self, name: str, namespace: str):
+        return datasets.create_output_dataset(name, namespace)
 
     def get_job_details_marquez(self, job_id: str):
         return marquez_source.get_job_details(job_id)

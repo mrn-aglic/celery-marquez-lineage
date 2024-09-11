@@ -14,15 +14,30 @@ class LineageTask(Task):
         self.parent_name = None
         self.parent_namespace = None
 
-    def _get_parent_run_details(self):
-        if self.request.parent_id:
+    def _get_input_dataset(self):
+        if self.parent_name is None:
+            return None
 
-            parent_run_details = self.client.get_job_details(
-                self.request.parent_id
+        dataset_name = self.parent_name.split(".")[-1]
+
+        return [
+            self.client.create_input_dataset(
+                name=dataset_name,
+                namespace=DEFAULT_NAMESPACE,
             )
+        ]
 
-            self.parent_name = parent_run_details["name"]
-            self.parent_namespace = parent_run_details["namespace"]
+    def _get_output_dataset(self, retval):
+
+        if retval is None:
+            return None
+
+        return [
+            self.client.create_output_dataset(
+                name=self.task_job_name,
+                namespace=DEFAULT_NAMESPACE,
+            )
+        ]
 
     def _get_parent_facet(self) -> dict[str, ParentRunFacet] | None:
         if not self.request.parent_id:
@@ -38,6 +53,7 @@ class LineageTask(Task):
 
     def before_start(self, task_id, args, kwargs):
         self.client = client.LineageClient()
+
         self.task_job_name = self.client.get_job_name_from_task_name(self.name)
 
         self._get_parent_run_details()
@@ -46,10 +62,19 @@ class LineageTask(Task):
 
         self.client.submit_event(
             event_type=RunState.RUNNING,
-            run_id=self.request.id,
+            run_id=task_id,
             name=self.task_job_name,
             run_facets=run_facets,
+            inputs=self._get_input_dataset(),
         )
+
+    def _get_parent_run_details(self):
+        if self.request.parent_id:
+
+            parent_run_details = self.client.get_job_details(self.request.parent_id)
+
+            self.parent_name = parent_run_details["name"]
+            self.parent_namespace = parent_run_details["namespace"]
 
     def __call__(self, *args, **kwargs):
 
@@ -62,6 +87,7 @@ class LineageTask(Task):
             run_id=self.request.id,
             name=self.task_job_name,
             run_facets=run_facets,
+            inputs=self._get_input_dataset(),
         )
 
         result = super().__call__(*args, **kwargs)
@@ -84,6 +110,7 @@ class LineageTask(Task):
             run_id=task_id,
             name=self.task_job_name,
             run_facets=run_facets,
+            outputs=self._get_output_dataset(retval),
         )
 
     # pylint: disable=too-many-arguments
@@ -96,9 +123,9 @@ class LineageTask(Task):
 
         error_facet = {"errorMessage": error_facet}
 
-        parent_facet = self._get_parent_facet()
+        run_facets = self._get_parent_facet()
 
-        run_facets = {**error_facet, **parent_facet}
+        run_facets = {**error_facet, **run_facets}
 
         self.client.submit_event(
             event_type=RunState.FAIL,
