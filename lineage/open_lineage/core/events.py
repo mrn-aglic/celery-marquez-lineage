@@ -1,6 +1,7 @@
 from datetime import UTC, datetime
 
 from openlineage.client.event_v2 import Job, Run, RunEvent, RunState
+from openlineage.client.generated.base import RunFacet
 
 
 def create_job(namespace: str, name: str) -> Job:

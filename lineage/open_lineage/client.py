@@ -36,6 +36,7 @@ class LineageClient:
             run_id=run_id,
             run_facets=run_facets,
             name=name,
+            run_facets=run_facets,
             namespace=namespace,
         )
 
@@ -49,3 +50,16 @@ class LineageClient:
             message=error_message,
             stack_trace=stack_trace,
         )
+    def create_parent_run_facet(
+        self,
+        parent_run_id: str,
+        parent_namespace: str,
+        parent_job_name: str,
+    ):
+        return facets.create_parent_run_facet(
+            parent_run_id=parent_run_id,
+            parent_namespace=parent_namespace,
+            parent_job_name=parent_job_name,
+        )
+    def get_job_details(self, job_id: str):
+        return marquez_source.get_job_details(job_id)
