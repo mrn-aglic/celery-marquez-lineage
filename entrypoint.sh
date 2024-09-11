@@ -2,8 +2,6 @@
 
 echo $1
 
-rm logs.txt
-
 if [ "$1" = 'scheduler' ]
 then
     exec celery -A lineage.beat beat --loglevel info

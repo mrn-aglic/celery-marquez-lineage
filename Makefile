@@ -14,6 +14,9 @@ down:
 build:
 	docker compose build
 
+build-cl:
+	docker compose down --volumes --rmi="all" && make build
+
 run:
 	make down && docker compose up
 
