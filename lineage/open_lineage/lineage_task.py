@@ -20,9 +20,7 @@ class LineageTask(Task):
         if self.request.parent_id:
             parent_run_details = self.client.get_job_details(self.request.parent_id)
 
-            self.parent_name = self.client.get_job_name_from_task_name(
-                parent_run_details["name"]
-            )
+            self.parent_name = parent_run_details["name"]
             self.parent_namespace = parent_run_details["namespace"]
 
     def _get_parent_facet(self) -> dict[str, ParentRunFacet] | None:
