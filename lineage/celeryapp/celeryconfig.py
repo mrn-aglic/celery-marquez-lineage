@@ -3,8 +3,6 @@ from kombu import Exchange, Queue
 broker_url = "redis://redis:6379/0"
 result_backend = "redis://redis:6379/1"
 
-task_cls="lineage.open_lineage.lineage_task.LineageTask"
-
 task_serializer = "json"
 accept_content = ["json"]
 result_serializer = "json"

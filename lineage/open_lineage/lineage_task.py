@@ -6,11 +6,11 @@ from lineage.open_lineage import client
 
 class LineageTask(Task):
     def __init__(self):
-        self.client = client.LineageClient()
-
         self.task_job_name = None
 
     def before_start(self, task_id, args, kwargs):
+        self.client = client.LineageClient()
+
         self.task_job_name = self.client.get_job_name_from_task_name(self.name)
 
         self.client.submit_event(
