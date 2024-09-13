@@ -4,6 +4,7 @@ from openlineage.client.transport import HttpTransport
 from openlineage.client.transport.http import HttpCompression, HttpConfig
 
 from lineage.app import config
+from lineage.open_lineage.consts import DEFAULT_NAMESPACE
 from lineage.open_lineage.core import events
 
 http_config = HttpConfig(
@@ -14,17 +15,19 @@ http_config = HttpConfig(
     compression=HttpCompression.GZIP,
 )
 
+http_transport = HttpTransport(http_config)
+
 
 class LineageClient:
     def __init__(self):
-        self.lineage_client = OpenLineageClient(transport=HttpTransport(http_config))
+        self.lineage_client = OpenLineageClient(transport=http_transport)
 
     def submit_event(
         self,
         event_type: RunState,
         run_id: str,
         name: str,
-        namespace="default",
+        namespace=DEFAULT_NAMESPACE,
     ):
         run_event = events.create_event(
             event_type=event_type,
