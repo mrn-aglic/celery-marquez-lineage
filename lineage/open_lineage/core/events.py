@@ -15,7 +15,7 @@ def create_event(
     event_type: RunState,
     run_id: str,
     name: str,
-    namespace="default",
+    namespace,
 ):
     return RunEvent(
         eventType=event_type,

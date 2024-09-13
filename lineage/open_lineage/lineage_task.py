@@ -6,6 +6,7 @@ from lineage.open_lineage import client
 
 class LineageTask(Task):
     def __init__(self):
+        self.client = None
         self.task_job_name = None
 
     def before_start(self, task_id, args, kwargs):

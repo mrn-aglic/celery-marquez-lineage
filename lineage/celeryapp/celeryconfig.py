@@ -13,7 +13,7 @@ task_create_missing_queues = True
 task_soft_time_limit = 2 * 60 * 60 * 60
 task_time_limit = task_soft_time_limit + 60
 worker_prefetch_multiplier = 1
-worker_concurrency = 1
+worker_concurrency = 4
 
 broker_connection_retry_on_startup = False
 

@@ -2,13 +2,13 @@ from lineage.celeryapp import app
 
 
 @app.task
-def printer(*args, **kwargs):
-    print("Hello from printer :-)")
+def forty_two(*args, **kwargs):
+    return 42
 
 
 @app.task
-def forty_two(*args, **kwargs):
-    return 42
+def printer(*args, **kwargs):
+    print("Hello from printer :-)")
 
 
 @app.task
