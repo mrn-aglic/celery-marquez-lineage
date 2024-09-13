@@ -1,5 +1,4 @@
 from lineage.celeryapp import app
-from lineage.open_lineage.lineage_task import LineageTask
 
 
 @app.task

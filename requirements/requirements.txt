@@ -31,7 +31,7 @@ click-repl==0.3.0
     # via celery
 idna==3.8
     # via requests
-kombu==5.4.0
+kombu==5.4.1
     # via celery
 openlineage-python==1.22.0
     # via -r requirements/requirements.in
@@ -53,7 +53,7 @@ six==1.16.0
     # via python-dateutil
 tzdata==2024.1
     # via celery
-urllib3==2.2.2
+urllib3==2.2.3
     # via requests
 vine==5.1.0
     # via
