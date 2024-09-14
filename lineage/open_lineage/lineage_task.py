@@ -40,8 +40,17 @@ class LineageTask(Task):
 
     # pylint: disable=too-many-arguments
     def on_failure(self, exc, task_id, args, kwargs, einfo):
+
+        error_facet = self.client.create_error_message_facet(
+            error_message=str(exc),
+            stack_trace=einfo.traceback,
+        )
+
+        error_facet = {"errorMessage": error_facet}
+
         self.client.submit_event(
             event_type=RunState.FAIL,
             run_id=task_id,
+            run_facets=error_facet,
             name=self.task_job_name,
         )
