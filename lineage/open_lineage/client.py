@@ -1,11 +1,13 @@
 from openlineage.client import OpenLineageClient
 from openlineage.client.event_v2 import RunState
+from openlineage.client.generated.base import RunFacet
 from openlineage.client.transport import HttpTransport
 from openlineage.client.transport.http import HttpCompression, HttpConfig
 
 from lineage.app import config
 from lineage.open_lineage.consts import DEFAULT_NAMESPACE
 from lineage.open_lineage.core import events, facets
+from lineage.open_lineage.details_source import marquez_source
 
 http_config = HttpConfig(
     url=config.MARQUEZ_URL,
@@ -28,7 +30,7 @@ class LineageClient:
         event_type: RunState,
         run_id: str,
         name: str,
-        run_facets: dict | None = None,
+        run_facets: dict[str, RunFacet] | None = None,
         namespace=DEFAULT_NAMESPACE,
     ):
         run_event = events.create_event(
@@ -36,7 +38,6 @@ class LineageClient:
             run_id=run_id,
             run_facets=run_facets,
             name=name,
-            run_facets=run_facets,
             namespace=namespace,
         )
 
@@ -50,6 +51,7 @@ class LineageClient:
             message=error_message,
             stack_trace=stack_trace,
         )
+
     def create_parent_run_facet(
         self,
         parent_run_id: str,
@@ -61,5 +63,6 @@ class LineageClient:
             parent_namespace=parent_namespace,
             parent_job_name=parent_job_name,
         )
+
     def get_job_details(self, job_id: str):
         return marquez_source.get_job_details(job_id)
