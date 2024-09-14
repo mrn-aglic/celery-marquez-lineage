@@ -1,5 +1,4 @@
 from lineage.celeryapp import app
-from lineage.open_lineage.lineage_task import LineageTask
 
 
 @app.task
@@ -10,11 +9,6 @@ def forty_two(*args, **kwargs):
 @app.task
 def printer(*args, **kwargs):
     print("Hello from printer :-)")
-
-
-@app.task(base=LineageTask)
-def forty_two(*args, **kwargs):
-    return 42
 
 
 @app.task
