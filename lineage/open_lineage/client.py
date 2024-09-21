@@ -7,7 +7,7 @@ from openlineage.client.transport.http import HttpCompression, HttpConfig
 from lineage.app import config
 from lineage.open_lineage.consts import DEFAULT_NAMESPACE
 from lineage.open_lineage.core import events, facets
-from lineage.open_lineage.details_source import marquez_source
+from lineage.open_lineage.details_source import marquez_source, redis_source
 
 http_config = HttpConfig(
     url=config.MARQUEZ_URL,
@@ -66,3 +66,25 @@ class LineageClient:
 
     def get_job_details_marquez(self, job_id: str):
         return marquez_source.get_job_details(job_id)
+
+    def store_job_details_redis(
+        self, run_id: str, name: str, namespace: str, parent_prefix: str | None = None
+    ):
+        job_name = f"{parent_prefix}.{name}" if parent_prefix is not None else name
+
+        redis_source.store_job_details(
+            run_id=run_id,
+            job_name=job_name,
+            job_namespace=namespace,
+        )
+
+    def get_job_details_redis(self, run_id: str):
+        return redis_source.get_job_details(run_id=run_id)
+
+    def get_job_details(self, job_id: str):
+        job_details = self.get_job_details_redis(job_id)
+
+        if job_details is None:
+            job_details = self.get_job_details_marquez(job_id)
+
+        return job_details
