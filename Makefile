@@ -21,7 +21,7 @@ run:
 	make down && docker compose up
 
 clean-run:
-	docker compose down --volumes && make run
+	make del-redis && docker compose down --volumes && make run
 
 build-and-run:
 	make build && make run
