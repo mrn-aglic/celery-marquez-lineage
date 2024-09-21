@@ -64,5 +64,5 @@ class LineageClient:
             parent_job_name=parent_job_name,
         )
 
-    def get_job_details(self, job_id: str):
+    def get_job_details_marquez(self, job_id: str):
         return marquez_source.get_job_details(job_id)

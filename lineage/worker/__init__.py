@@ -15,8 +15,8 @@ def setup_periodic_tasks(sender, **kwargs):
             return
 
         simple_pipeline.lineage_pipeline.s().apply_async(countdown=35)
-        slow_task.s().apply_async(countdown=35)
-        failing_pipeline.pipeline.s().apply_async(countdown=35)
+        # slow_task.s().apply_async(countdown=35)
+        # failing_pipeline.pipeline.s().apply_async(countdown=35)
 
     except Exception as e:
         logger.error(f"An exception occurred: {e}")
