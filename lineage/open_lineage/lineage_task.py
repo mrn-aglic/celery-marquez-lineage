@@ -3,6 +3,7 @@ from openlineage.client.event_v2 import RunState
 from openlineage.client.generated.parent_run import ParentRunFacet
 
 from lineage.open_lineage import client
+from lineage.open_lineage.consts import DEFAULT_NAMESPACE
 
 
 class LineageTask(Task):
@@ -13,30 +14,12 @@ class LineageTask(Task):
         self.parent_name = None
         self.parent_namespace = None
 
-    def before_start(self, task_id, args, kwargs):
-        self.client = client.LineageClient()
-        self.task_job_name = self.client.get_job_name_from_task_name(self.name)
-
-        self._get_parent_run_details()
-
-        run_facets = self._get_parent_facet()
-
-        self.client.submit_event(
-            event_type=RunState.RUNNING,
-            run_id=self.request.id,
-            name=self.task_job_name,
-            run_facets=run_facets,
-        )
-
     def _get_parent_run_details(self):
         if self.request.parent_id:
 
-            print(self.request)
-            print(self.request.parent_id)
-
-            parent_run_details = self.client.get_job_details(self.request.parent_id)
-
-            print(parent_run_details)
+            parent_run_details = self.client.get_job_details_marquez(
+                self.request.parent_id
+            )
 
             self.parent_name = parent_run_details["name"]
             self.parent_namespace = parent_run_details["namespace"]
@@ -53,11 +36,26 @@ class LineageTask(Task):
 
         return {"parent": parent_run_facet}
 
-    def __call__(self, *args, **kwargs):
+    def before_start(self, task_id, args, kwargs):
+        self.client = client.LineageClient()
+        self.task_job_name = self.client.get_job_name_from_task_name(self.name)
+
+        self._get_parent_run_details()
 
         run_facets = self._get_parent_facet()
 
-        print(f"JOB NAME: {self.task_job_name}")
+        self.client.submit_event(
+            event_type=RunState.RUNNING,
+            run_id=self.request.id,
+            name=self.task_job_name,
+            run_facets=run_facets,
+        )
+
+    def __call__(self, *args, **kwargs):
+
+        self._get_parent_run_details()
+
+        run_facets = self._get_parent_facet()
 
         self.client.submit_event(
             event_type=RunState.RUNNING,
@@ -73,6 +71,13 @@ class LineageTask(Task):
     def on_success(self, retval, task_id, args, kwargs):
 
         run_facets = self._get_parent_facet()
+
+        self.client.store_job_details_redis(
+            run_id=task_id,
+            name=self.task_job_name,
+            namespace=DEFAULT_NAMESPACE,
+            parent_prefix="" if self.parent_name is None else self.parent_name,
+        )
 
         self.client.submit_event(
             event_type=RunState.COMPLETE,
