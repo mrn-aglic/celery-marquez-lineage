@@ -14,7 +14,8 @@ def setup_periodic_tasks(sender, **kwargs):
         if config.is_scheduler():
             return
 
-        simple_pipeline.lineage_pipeline.s().apply_async(countdown=35)
+        simple_pipeline.pipeline_group.s().apply_async(countdown=35)
+        # simple_pipeline.lineage_pipeline.s().apply_async(countdown=35)
         # slow_task.s().apply_async(countdown=35)
         # failing_pipeline.pipeline.s().apply_async(countdown=35)
 
