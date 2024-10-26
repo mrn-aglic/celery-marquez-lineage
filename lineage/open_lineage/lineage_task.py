@@ -51,10 +51,22 @@ class LineageTask(Task):
 
         return {"parent": parent_run_facet}
 
+    def _get_job_name_from_properties(self):
+        prop_name = "lineage_name"
+
+        return self.request.properties.get(prop_name, None)
+
+    def _get_job_name(self):
+        return (
+            self._get_job_name_from_properties()
+            or self.client.get_job_name_from_task_name(self.name)
+        )
+
     def before_start(self, task_id, args, kwargs):
+
         self.client = client.LineageClient()
 
-        self.task_job_name = self.client.get_job_name_from_task_name(self.name)
+        self.task_job_name = self._get_job_name()
 
         self._get_parent_run_details()
 
